@@ -13,7 +13,7 @@
                 <bar-summary-graph></bar-summary-graph>
             </div>
             <div class="md-layout-item md-elevation-2 padding-class">
-                <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
+                <line-summary-graph></line-summary-graph>
             </div>
         </div>
         <div class="md-layout md-gutter-large">
@@ -35,12 +35,14 @@ import { Component, Vue } from 'vue-property-decorator'
 import SummaryTable from '@/components/SummaryTable.vue'
 import PieSummaryChart from '@/components/PieSummaryChart.vue'
 import BarSummaryGraph from '@/components/BarSummaryGraph.vue'
+import LineSummaryGraph from '@/components/LineSummaryGraph.vue'
 
 @Component({
   components: {
     SummaryTable,
     PieSummaryChart,
-    BarSummaryGraph
+    BarSummaryGraph,
+    LineSummaryGraph
   }
 })
 export default class HomeCharts extends Vue {
