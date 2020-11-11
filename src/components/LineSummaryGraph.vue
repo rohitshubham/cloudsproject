@@ -106,23 +106,9 @@ export default class LineSummaryGraph extends Vue {
       this.chartData.datasets = [{
         data: totalConfirmedData,
         fill: true,
-        backgroundColor: '#f4ff81',
+        backgroundColor: 'rgba(244, 255, 129, 0.7)',
         label: ['Total Cases']
       }]
-
-      const totalDeathData: string[] = []
-      let totalDeaths = 0
-      for (const data of globalData) {
-        totalDeaths = parseInt(data.NewDeaths) + totalDeaths
-        totalDeathData.unshift(totalDeaths.toString())
-      }
-
-      this.chartData.datasets.push({
-        data: totalDeathData,
-        fill: true,
-        backgroundColor: '#ffa4a2',
-        label: ['Total Deaths']
-      })
 
       const totalRecoveredData: string[] = []
       let totalRecoveries = 0
@@ -131,11 +117,25 @@ export default class LineSummaryGraph extends Vue {
         totalRecoveredData.unshift(totalRecoveries.toString())
       }
 
-      this.chartData.datasets.push({
+      this.chartData.datasets.unshift({
         data: totalRecoveredData,
         fill: true,
-        backgroundColor: '#80d8ff',
+        backgroundColor: 'rgba(128, 216, 255, 0.7)',
         label: ['Total Recoveries']
+      })
+
+      const totalDeathData: string[] = []
+      let totalDeaths = 0
+      for (const data of globalData) {
+        totalDeaths = parseInt(data.NewDeaths) + totalDeaths
+        totalDeathData.unshift(totalDeaths.toString())
+      }
+
+      this.chartData.datasets.unshift({
+        data: totalDeathData,
+        fill: true,
+        backgroundColor: 'rgba(255, 164, 162, 0.7)',
+        label: ['Total Deaths']
       })
     }
 

@@ -69,13 +69,13 @@
     margin: 1%;
 }
 .total-cases{
-    background: #f4ff81
+    background: rgba(244, 255, 129, 0.7)
 }
 .recovered-cases{
-    background: #ffa4a2;
+    background: rgba(255, 164, 162, 0.7);
 }
 .death-cases{
-    background: #80d8ff
+    background: rgba(128, 216, 255, 0.7)
 }
 .summary-table{
     position: center;
