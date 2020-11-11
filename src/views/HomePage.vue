@@ -6,7 +6,13 @@
     </div>
   </div>
     <home-charts></home-charts>
+  <div class="md-layout">
+    <div class="md-layout-item md-elevation-2 padding-class">
+      <span>Data Source: <a href="https://covid19api.com">Covid-19 API / Johns Hopkins CSSE</a></span>
+    </div>
   </div>
+  </div>
+
 </template>
 <style scoped>
 span {
@@ -14,6 +20,9 @@ span {
   height: 100%;
   padding: 8px;
   display: block;
+}
+.padding-class{
+    margin: 1%;
 }
 </style>
 <script lang='ts'>
