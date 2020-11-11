@@ -33,7 +33,14 @@ export default class BarSummaryGraph extends Vue {
 
     private options = {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      scales: {
+        xAxes: [{
+          gridLines: {
+            drawOnChartArea: false
+          }
+        }]
+      }
     }
 
     public getSummary (): void {

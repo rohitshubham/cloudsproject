@@ -94,13 +94,13 @@ export default class LineSummaryGraph extends Vue {
 
       this.summarySpinner = false
 
-      // globalData.sort((b, a) => (parseInt(a.TotalConfirmed) > parseInt(b.TotalConfirmed)) ? 1 : ((parseInt(b.TotalConfirmed) > parseInt(a.TotalConfirmed)) ? -1 : 0))
+      globalData.sort((b, a) => (parseInt(a.TotalConfirmed) > parseInt(b.TotalConfirmed)) ? 1 : ((parseInt(b.TotalConfirmed) > parseInt(a.TotalConfirmed)) ? -1 : 0))
 
       const totalConfirmedData: string[] = []
       let totalConfirmed = 0
       for (const data of globalData) {
-        totalConfirmed = parseInt(data.NewConfirmed) + totalConfirmed
-        totalConfirmedData.unshift(totalConfirmed.toString())
+        totalConfirmed = parseInt(data.TotalConfirmed)
+        totalConfirmedData.push(totalConfirmed.toString())
       }
 
       this.chartData.datasets = [{
@@ -111,10 +111,10 @@ export default class LineSummaryGraph extends Vue {
       }]
 
       const totalRecoveredData: string[] = []
-      let totalRecoveries = 0
+      let totalRecoveries = ''
       for (const data of globalData) {
-        totalRecoveries = parseInt(data.NewRecovered) + totalRecoveries
-        totalRecoveredData.unshift(totalRecoveries.toString())
+        totalRecoveries = data.TotalRecovered
+        totalRecoveredData.push(totalRecoveries)
       }
 
       this.chartData.datasets.unshift({
@@ -125,10 +125,10 @@ export default class LineSummaryGraph extends Vue {
       })
 
       const totalDeathData: string[] = []
-      let totalDeaths = 0
+      let totalDeaths = ''
       for (const data of globalData) {
-        totalDeaths = parseInt(data.NewDeaths) + totalDeaths
-        totalDeathData.unshift(totalDeaths.toString())
+        totalDeaths = data.TotalDeaths
+        totalDeathData.push(totalDeaths)
       }
 
       this.chartData.datasets.unshift({
