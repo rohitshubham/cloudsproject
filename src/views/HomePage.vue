@@ -1,14 +1,17 @@
 <template>
   <div>
  <div class="md-layout">
-    <div class="md-layout-item">
-      <span>Covid-19 information center</span>
+    <div class="md-layout-item md-elevation-2" style="margin: 1%;">
+      <div class="header">
+        <img class= "coronavirus-image" :src="imageUrl" alt="Coronavirus">
+        <h1>Covid-19 Information Center</h1>
+        </div>
     </div>
   </div>
     <home-charts></home-charts>
   <div class="md-layout">
     <div class="md-layout-item md-elevation-2 padding-class">
-      <span>Data Source: <a href="https://covid19api.com">Covid-19 API / Johns Hopkins CSSE</a></span>
+      <div>Data Source: <a href="https://covid19api.com">Covid-19 API / Johns Hopkins CSSE</a> | Developed by: Rohit Raj</div>
     </div>
   </div>
   </div>
@@ -24,11 +27,33 @@ span {
 .padding-class{
     margin: 1%;
 }
+
+.header img {
+  width: 50px;
+  height: 50px;
+  float: left;
+  margin-right: 10px;
+}
+
+.header h1 {
+  position: relative;
+  width: max-content;
+  float: left;
+}
+
+.header{
+  margin: auto;
+  width: 30%;
+}
 </style>
 <script lang='ts'>
 import Navigation from '@/components/Navigation.vue'
 import HomeCharts from '@/components/HomeCharts.vue'
 import { Component, Vue } from 'vue-property-decorator'
+import firebase from 'firebase/app'
+import 'firebase/storage'
+
+declare let firebaseObj: any
 
 @Component({
   components: {
@@ -37,5 +62,14 @@ import { Component, Vue } from 'vue-property-decorator'
   }
 })
 export default class HomePage extends Vue {
+  private imageUrl= ''
+  mounted () {
+    const storage = firebaseObj.storage()
+    const gsReference = storage.refFromURL('gs://covid19-fa2c0.appspot.com/23312-min(1).jpg')
+
+    gsReference.getDownloadURL().then((url) => {
+      this.imageUrl = url
+    })
+  }
 }
 </script>
