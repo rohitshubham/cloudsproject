@@ -2,7 +2,7 @@
         <div class='summary-table'>
             <md-table>
             <md-table-toolbar>
-                <h3 class="md-title">Coronavirus Summary Worldwide</h3>
+                <h3 class="md-title">{{getTableHeader()}}</h3>
             </md-table-toolbar>
             </md-table>
             <md-progress-spinner v-if="summarySpinner" md-mode="indeterminate"></md-progress-spinner>
@@ -82,11 +82,12 @@
 }
 </style>
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import axios from 'axios'
 
 @Component
 export default class SummaryTable extends Vue {
+    @Prop() readonly country
     table = ''
     private summarySpinner = true
 
@@ -111,8 +112,15 @@ export default class SummaryTable extends Vue {
       }, 1000)
     }
 
-    private updateTable (response): void {
-      const globalData = response.data.Global
+    private getTableHeader (): string {
+      if (this.country === 'summary') {
+        return 'Coronavirus Summary Worldwide'
+      }
+
+      return `Coronavirus Summary in ${this.country}`
+    }
+
+    private updateSummaryTable (globalData): void {
       this.totalCases = globalData.TotalConfirmed
       this.newCases = globalData.NewConfirmed
       this.newDeaths = globalData.NewDeaths
@@ -123,7 +131,23 @@ export default class SummaryTable extends Vue {
       this.activeCases = this.totalCases - (this.totalDeaths + this.totalRecovered)
       this.mortalityRate = (this.totalDeaths / (this.totalCases - this.activeCases)) * 100
       this.recoveryRate = (this.totalRecovered / (this.totalCases - this.activeCases)) * 100
+    }
 
+    private getData (response) {
+      if (this.country === 'summary') {
+        return response.data.Global
+      } else {
+        for (const data of response.data.Countries) {
+          if (data.Slug === this.country) {
+            return data
+          }
+        }
+      }
+    }
+
+    private updateTable (response): void {
+      const globalData = this.getData(response)
+      this.updateSummaryTable(globalData)
       this.summarySpinner = false
     }
 

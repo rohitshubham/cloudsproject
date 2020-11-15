@@ -8,7 +8,7 @@
         </div>
     </div>
   </div>
-    <home-charts></home-charts>
+    <home-charts v-if="country.length > 0" :country="country"></home-charts>
   <div class="md-layout">
     <div class="md-layout-item md-elevation-2 padding-class">
       <div>Data Source: <a href="https://covid19api.com">Covid-19 API / Johns Hopkins CSSE</a> | Developed by: Rohit Raj</div>
@@ -63,7 +63,9 @@ declare let firebaseObj: any
 })
 export default class HomePage extends Vue {
   private imageUrl= ''
+  private country = ''
   mounted () {
+    this.country = 'summary'
     const storage = firebaseObj.storage()
     const gsReference = storage.refFromURL('gs://covid19-fa2c0.appspot.com/23312-min(1).jpg')
 

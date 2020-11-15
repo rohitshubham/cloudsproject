@@ -2,7 +2,7 @@
         <div class='summary-table'>
           <md-table>
            <md-table-toolbar>
-                    <h3 class="md-title">Coronavirus Cases Distribution Worldwide</h3>
+                    <h3 class="md-title">{{getTableHeader()}}</h3>
             </md-table-toolbar>
           </md-table>
             <md-progress-spinner v-if="summarySpinner" md-mode="indeterminate"></md-progress-spinner>
@@ -16,7 +16,7 @@
 }
 </style>
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import PieChart from '@/components/ChartVue/PieChart.vue'
 import axios from 'axios'
 
@@ -24,6 +24,7 @@ import axios from 'axios'
   components: { PieChart }
 })
 export default class PieSummaryChart extends Vue {
+  @Prop() readonly country
     private renderChart!: (chartData: any, options?: any) => void;
     private summarySpinner = true
 
@@ -37,6 +38,14 @@ export default class PieSummaryChart extends Vue {
       maintainAspectRatio: false
     }
 
+    private getTableHeader (): string {
+      if (this.country === 'summary') {
+        return 'Coronavirus Cases Distribution Worldwide'
+      }
+
+      return `Coronavirus Case Distribution in ${this.country}`
+    }
+
     public getSummary (): void {
       setTimeout(() => {
         axios
@@ -45,9 +54,19 @@ export default class PieSummaryChart extends Vue {
       }, 1000)
     }
 
-    private updateChart (response): void {
-      const globalData = response.data.Global
+    private getData (response) {
+      if (this.country === 'summary') {
+        return response.data.Global
+      } else {
+        for (const data of response.data.Countries) {
+          if (data.Slug === this.country) {
+            return data
+          }
+        }
+      }
+    }
 
+    private updateChartData (globalData): void {
       const totalDeaths = globalData.TotalDeaths
       const totalRecovered = globalData.TotalRecovered
       const activeCases = globalData.TotalConfirmed - (totalDeaths + totalRecovered)
@@ -57,6 +76,11 @@ export default class PieSummaryChart extends Vue {
         data: [activeCases, totalDeaths, totalRecovered],
         backgroundColor: ['#f4ff81', '#ffa4a2', '#80d8ff']
       }]
+    }
+
+    private updateChart (response): void {
+      const globalData = this.getData(response)
+      this.updateChartData(globalData)
     }
 
     mounted () {

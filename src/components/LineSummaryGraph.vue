@@ -17,7 +17,7 @@
 </style>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import LineGraph from '@/components/ChartVue/LineGraph.vue'
 import axios from 'axios'
 
@@ -25,8 +25,9 @@ import axios from 'axios'
   components: { LineGraph }
 })
 export default class LineSummaryGraph extends Vue {
+    @Prop() readonly country
     private summarySpinner = true
-
+    private isSummaryCall = true
     private chartData = {
       labels: ['Active Cases', 'Dead Cases', 'Recovered Cases'],
       datasets: [{}]
@@ -71,8 +72,15 @@ export default class LineSummaryGraph extends Vue {
       const endDate = '2020-04-13'
 
       setTimeout(() => {
+        let url
+        if (this.country === 'summary') {
+          url = `https://api.covid19api.com/world?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`
+        } else {
+          this.isSummaryCall = false
+          url = `https://api.covid19api.com/country/${this.country}?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`
+        }
         axios
-          .get(`https://api.covid19api.com/world?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`)
+          .get(url)
           .then(response => (this.updateChart(response)))
       }, 1000)
     }
@@ -93,14 +101,13 @@ export default class LineSummaryGraph extends Vue {
       this.chartData.labels = this.generateLabels(globalData.length)
 
       this.summarySpinner = false
-
-      globalData.sort((b, a) => (parseInt(a.TotalConfirmed) > parseInt(b.TotalConfirmed)) ? 1 : ((parseInt(b.TotalConfirmed) > parseInt(a.TotalConfirmed)) ? -1 : 0))
+      if (this.isSummaryCall) { globalData.sort((b, a) => (parseInt(a.TotalConfirmed) > parseInt(b.TotalConfirmed)) ? 1 : ((parseInt(b.TotalConfirmed) > parseInt(a.TotalConfirmed)) ? -1 : 0)) }
 
       const totalConfirmedData: string[] = []
       let totalConfirmed = 0
       for (const data of globalData) {
-        totalConfirmed = parseInt(data.TotalConfirmed)
-        totalConfirmedData.push(totalConfirmed.toString())
+        totalConfirmed = this.isSummaryCall ? parseInt(data.TotalConfirmed) : parseInt(data.Confirmed)
+        this.isSummaryCall ? totalConfirmedData.push(totalConfirmed.toString()) : totalConfirmedData.unshift(totalConfirmed.toString())
       }
 
       this.chartData.datasets = [{
@@ -113,8 +120,8 @@ export default class LineSummaryGraph extends Vue {
       const totalRecoveredData: string[] = []
       let totalRecoveries = ''
       for (const data of globalData) {
-        totalRecoveries = data.TotalRecovered
-        totalRecoveredData.push(totalRecoveries)
+        totalRecoveries = this.isSummaryCall ? data.TotalRecovered : data.Recovered
+        this.isSummaryCall ? totalRecoveredData.push(totalRecoveries) : totalRecoveredData.unshift(totalRecoveries)
       }
 
       this.chartData.datasets.unshift({
@@ -127,8 +134,8 @@ export default class LineSummaryGraph extends Vue {
       const totalDeathData: string[] = []
       let totalDeaths = ''
       for (const data of globalData) {
-        totalDeaths = data.TotalDeaths
-        totalDeathData.push(totalDeaths)
+        totalDeaths = this.isSummaryCall ? data.TotalDeaths : data.Deaths
+        this.isSummaryCall ? totalDeathData.push(totalDeaths) : totalDeathData.unshift(totalDeaths)
       }
 
       this.chartData.datasets.unshift({

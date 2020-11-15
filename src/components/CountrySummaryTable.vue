@@ -8,7 +8,7 @@
             <md-progress-spinner v-if="summarySpinner" md-mode="indeterminate"></md-progress-spinner>
             <md-table md-sort="name"  md-card md-sort-order="asc" v-model="countries" v-if="!summarySpinner">
                 <md-table-row slot="md-table-row" slot-scope = "{ item }">
-                  <md-table-cell class="country" md-label="Country Name" md-sort-by="name">{{ item.name }}</md-table-cell>
+                  <md-table-cell class="country" md-label="Country Name" md-sort-by="name"><a :href='"/country/" + item.slug'>{{ item.name }}</a></md-table-cell>
                   <md-table-cell class="total-cases" md-label="New Cases" md-sort-by="newCases">{{ item.newCases }}</md-table-cell>
                   <md-table-cell class="total-cases" md-label="Total Cases" md-sort-by="totalCases">{{ item.totalCases }}</md-table-cell>
                   <md-table-cell class="recovered-cases" md-label="New Recoveries" md-sort-by="newRecoveries">{{ item.newRecoveries }}</md-table-cell>
@@ -45,6 +45,9 @@ td.recovered-cases{
   background-color: rgba(255, 109, 0, 0.1)
 }
 
+.country{
+  text-decoration: underline;
+}
 </style>
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
@@ -76,7 +79,8 @@ export default class CountrySummaryTable extends Vue {
           newRecoveries: data.NewRecovered,
           totalRecoveries: data.TotalRecovered,
           newDeaths: data.NewDeaths,
-          totalDeaths: data.TotalDeaths
+          totalDeaths: data.TotalDeaths,
+          slug: data.Slug
         })
       }
       this.summarySpinner = false
