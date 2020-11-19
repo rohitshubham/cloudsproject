@@ -42,12 +42,16 @@ export default class PieSummaryChart extends Vue {
       maintainAspectRatio: false
     }
 
+    private capitalizeFirstLetter (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    }
+
     private getTableHeader (): string {
       if (this.country === 'summary') {
         return 'Coronavirus Cases Distribution Worldwide'
       }
 
-      return `Coronavirus Case Distribution in ${this.country}`
+      return `Coronavirus Case Distribution in ${this.capitalizeFirstLetter(this.country)}`
     }
 
     private getFirebaseData (response): Dictionary<any> {

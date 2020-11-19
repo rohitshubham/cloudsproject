@@ -11,7 +11,7 @@
     </div>
   </div>
   <div class="md-layout">
-      <div class="md-layout-item" ><h1>{{countryName}}</h1></div>
+      <div class="md-layout-item" ><h1>{{capitalizeFirstLetter(countryName)}}</h1></div>
     </div>
     <home-charts v-if="country.length > 0" :country="country" ></home-charts>
   <div class="md-layout">
@@ -67,7 +67,6 @@ interface WithRoute {
   components: {
     HomeCharts
   }
-
 })
 export default class Country extends Vue implements WithRoute {
     private countryName = ''
@@ -83,6 +82,10 @@ export default class Country extends Vue implements WithRoute {
       gsReference.getDownloadURL().then((url) => {
         this.imageUrl = url
       })
+    }
+
+    private capitalizeFirstLetter (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
     }
 
     mounted () {

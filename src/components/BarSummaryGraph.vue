@@ -168,12 +168,16 @@ export default class BarSummaryGraph extends Vue {
       this.updateChart(newConfirmedData, newDeathData, newRecoveredData)
     }
 
+    private capitalizeFirstLetter (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    }
+
     private getTableHeader (): string {
       if (this.country === 'summary') {
         return 'Daily Coronavirus Cases Worldwide'
       }
 
-      return `Daily Coronavirus Cases in ${this.country}`
+      return `Daily Coronavirus Cases in ${this.capitalizeFirstLetter(this.country)}`
     }
 
     private updateChart (newConfirmedData, newDeathData, newRecoveredData): void {

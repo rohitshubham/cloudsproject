@@ -2,7 +2,7 @@
         <div class='summary-table'>
             <md-table>
            <md-table-toolbar>
-                    <h3 class="md-title">Total Corona Virus Cases Worldwide</h3>
+                    <h3 class="md-title">{{getTableHeader()}}</h3>
             </md-table-toolbar>
             </md-table>
             <md-progress-spinner v-if="summarySpinner" md-mode="indeterminate"></md-progress-spinner>
@@ -68,6 +68,18 @@ export default class LineSummaryGraph extends Vue {
         }
         ]
       }
+    }
+
+    private capitalizeFirstLetter (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    }
+
+    private getTableHeader (): string {
+      if (this.country === 'summary') {
+        return 'Total Coronavirus Cases Worldwide'
+      }
+
+      return `Total Coronavirus cases in ${this.capitalizeFirstLetter(this.country)}`
     }
 
     public database = firebaseObj.firestore()

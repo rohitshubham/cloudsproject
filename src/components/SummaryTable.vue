@@ -167,12 +167,16 @@ export default class SummaryTable extends Vue {
       }, 100)
     }
 
+    private capitalizeFirstLetter (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    }
+
     private getTableHeader (): string {
       if (this.country === 'summary') {
         return 'Coronavirus Summary Worldwide'
       }
 
-      return `Coronavirus Summary in ${this.country}`
+      return `Coronavirus Summary in ${this.capitalizeFirstLetter(this.country)}`
     }
 
     private updateSummaryTable (globalData): void {
