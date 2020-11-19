@@ -2,10 +2,12 @@
   <div>
  <div class="md-layout">
     <div class="md-layout-item md-elevation-2" style="margin: 1%;">
+      <a href="/">
       <div class="header">
         <img class= "coronavirus-image" :src="imageUrl" alt="Coronavirus">
         <h1>Covid-19 Information Center</h1>
         </div>
+      </a>
     </div>
   </div>
     <home-charts v-if="country.length > 0" :country="country"></home-charts>
@@ -43,7 +45,7 @@ span {
 
 .header{
   margin: auto;
-  width: 30%;
+  width:30%;
 }
 </style>
 <script lang='ts'>
@@ -53,7 +55,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import firebase from 'firebase/app'
 import 'firebase/storage'
 
-declare let firebaseObj: any
+declare let firebaseObj: any | undefined
 
 @Component({
   components: {
@@ -64,7 +66,7 @@ declare let firebaseObj: any
 export default class HomePage extends Vue {
   private imageUrl= ''
   private country = ''
-  mounted () {
+  private initApp (): void {
     this.country = 'summary'
     const storage = firebaseObj.storage()
     const gsReference = storage.refFromURL('gs://covid19-fa2c0.appspot.com/23312-min(1).jpg')
@@ -72,6 +74,13 @@ export default class HomePage extends Vue {
     gsReference.getDownloadURL().then((url) => {
       this.imageUrl = url
     })
+  }
+
+  mounted () {
+    setTimeout(() =>
+      this.initApp(),
+    500
+    )
   }
 }
 </script>

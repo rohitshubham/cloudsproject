@@ -20,6 +20,10 @@
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import LineGraph from '@/components/ChartVue/LineGraph.vue'
 import axios from 'axios'
+import 'firebase/firestore'
+import { Dictionary } from 'vue-router/types/router'
+
+declare let firebaseObj: any | undefined
 
 @Component({
   components: { LineGraph }
@@ -33,6 +37,7 @@ export default class LineSummaryGraph extends Vue {
       datasets: [{}]
     }
 
+    private url = ''
     private options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -65,6 +70,55 @@ export default class LineSummaryGraph extends Vue {
       }
     }
 
+    public database = firebaseObj.firestore()
+
+    private checkRequiresUpdate (firebaseData) {
+      const dateSaved = new Date(firebaseData.time)
+      const dateToday = new Date()
+      dateToday.setHours(0, 0, 0, 0)
+
+      return dateSaved < dateToday
+    }
+
+    private getFirebaseData (response): Dictionary<any> {
+      const date = new Date()
+      date.setHours(0, 0, 0, 0)
+      return {
+        name: this.country,
+        time: date.toISOString(),
+        response: JSON.stringify(response)
+      }
+    }
+
+    private checkIfDocExists () {
+      const cityRef = this.database.collection('countriesLine').doc(this.country)
+      cityRef.get().then(data => {
+        if (data.exists) {
+          const firebaseData = data.data()
+          if (this.checkRequiresUpdate(firebaseData)) {
+            axios
+              .get(this.url)
+              .then(response => {
+                cityRef.set(this.getFirebaseData(response))
+                console.log('Updated line graph data in firestore')
+                this.updateChart(response)
+              })
+          } else {
+            console.log('fetched line graph from firestore')
+            this.updateChart(JSON.parse(firebaseData.response))
+          }
+        } else {
+          axios
+            .get(this.url)
+            .then(response => {
+              cityRef.set(this.getFirebaseData(response))
+              console.log('Updated line graph data in firestore')
+              this.updateChart(response)
+            })
+        }
+      })
+    }
+
     public getSummary (): void {
       const todayDate = new Date()
       const startDate = todayDate.toISOString().slice(0, 10)
@@ -72,17 +126,17 @@ export default class LineSummaryGraph extends Vue {
       const endDate = '2020-04-13'
 
       setTimeout(() => {
-        let url
         if (this.country === 'summary') {
-          url = `https://api.covid19api.com/world?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`
+          this.url = `https://api.covid19api.com/world?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`
+          axios
+            .get(this.url)
+            .then(response => this.updateChart(response))
         } else {
           this.isSummaryCall = false
-          url = `https://api.covid19api.com/country/${this.country}?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`
+          this.url = `https://api.covid19api.com/country/${this.country}?from=${endDate}T00:00:00Z&to=${startDate}T00:00:00Z`
+          this.checkIfDocExists()
         }
-        axios
-          .get(url)
-          .then(response => (this.updateChart(response)))
-      }, 1000)
+      }, 500)
     }
 
     private generateLabels (labelLength: number): string[] {

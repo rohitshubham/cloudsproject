@@ -19,6 +19,10 @@
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import BarGraph from '@/components/ChartVue/BarGraph.vue'
 import axios from 'axios'
+import 'firebase/firestore'
+import { Dictionary } from 'vue-router/types/router'
+
+declare let firebaseObj: any | undefined
 
 export class CountryDataFetchService {
   private confirmedCountryData
@@ -114,6 +118,7 @@ export default class BarSummaryGraph extends Vue {
       }
     }
 
+    public database = firebaseObj.firestore()
     public getSummary (): void {
       const todayDate = new Date()
       const pastDate = todayDate.getDate() - 7
@@ -194,17 +199,63 @@ export default class BarSummaryGraph extends Vue {
       })
     }
 
+    private getFirebaseItem (response): Dictionary<any> {
+      const date = new Date()
+      date.setHours(0, 0, 0, 0)
+      return {
+        name: this.country,
+        time: date,
+        newConfirmedData: JSON.stringify(response[0]),
+        newDeathData: JSON.stringify(response[2]),
+        newRecoveredData: JSON.stringify(response[1])
+      }
+    }
+
+    private checkRequiresUpdate (firebaseData) {
+      const dateSaved = new Date(firebaseData.time)
+      const dateToday = new Date()
+      dateToday.setHours(0, 0, 0, 0)
+
+      return dateSaved < dateToday
+    }
+
+    private checkIfDataExists () {
+      const cityRef = this.database.collection('countriesBar').doc(this.country)
+      const cc = new CountryDataFetchService(this.country)
+      cityRef.get().then((data) => {
+        if (data.exists) {
+          const firebaseData = data.data()
+          if (this.checkRequiresUpdate(firebaseData)) {
+            cc.getCountryData().then((response: any) => {
+              cityRef.set(this.getFirebaseItem(response))
+              console.log('Updated bar graph data in firestore')
+              this.updateChart(response[0], response[2], response[1])
+            })
+          } else {
+            console.log('fetched bar graph from firestore')
+            this.updateChart(JSON.parse(firebaseData.newConfirmedData),
+              JSON.parse(firebaseData.newDeathData),
+              JSON.parse(firebaseData.newRecoveredData)
+            )
+          }
+        } else {
+          cc.getCountryData().then((response: any) => {
+            cityRef.set(this.getFirebaseItem(response))
+            console.log('Updated bar graph data in firestore')
+            this.updateChart(response[0], response[2], response[1])
+          })
+        }
+      })
+    }
+
     mounted () {
       setTimeout(() => {
         if (this.country === 'summary') {
           this.getSummary()
         } else {
-          const cc = new CountryDataFetchService(this.country)
-          cc.getCountryData().then((response: any) => {
-            this.updateChart(response[0], response[2], response[1])
-          })
+          this.checkIfDataExists()
         }
-      }, 1000)
+      }, 500)
     }
 }
 </script>

@@ -84,6 +84,10 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import axios from 'axios'
+import 'firebase/firestore'
+import { Dictionary } from 'vue-router/types/router'
+
+declare let firebaseObj: any | undefined
 
 @Component
 export default class SummaryTable extends Vue {
@@ -104,12 +108,63 @@ export default class SummaryTable extends Vue {
     private newDeaths = 0
     private mortalityRate = 0
 
+    private getFirebaseData (response): Dictionary<any> {
+      const date = new Date()
+      date.setHours(0, 0, 0, 0)
+      return {
+        name: this.country,
+        time: date.toISOString(),
+        response: JSON.stringify(response)
+      }
+    }
+
+    public database = firebaseObj.firestore()
+
+    private checkRequiresUpdate (firebaseData) {
+      const dateSaved = new Date(firebaseData.time)
+      const dateToday = new Date()
+      dateToday.setHours(0, 0, 0, 0)
+
+      return dateSaved < dateToday
+    }
+
+    private checkIfDocExists () {
+      const cityRef = this.database.collection('countries').doc(this.country)
+      cityRef.get().then((data) => {
+        /* eslint-disable no-debugger */
+        if (data.exists) {
+          const firebaseData = data.data()
+          if (this.checkRequiresUpdate(firebaseData)) {
+            axios.get('https://api.covid19api.com/summary')
+              .then(response => {
+                cityRef.set(this.getFirebaseData(response))
+                console.log('Updated data in firestore')
+                this.updateTable(response)
+              })
+          } else {
+            console.log('Summary Table Fetched from firestore')
+            this.updateTable(JSON.parse(firebaseData.response))
+          }
+        } else {
+          axios.get('https://api.covid19api.com/summary')
+            .then(response => {
+              cityRef.set(this.getFirebaseData(response))
+              this.updateTable(response)
+            })
+        }
+      })
+    }
+
     public getSummary (): void {
       setTimeout(() => {
-        axios
-          .get('https://api.covid19api.com/summary')
-          .then(response => (this.updateTable(response)))
-      }, 1000)
+        if (this.country === 'summary') {
+          axios
+            .get('https://api.covid19api.com/summary')
+            .then(response => (this.updateTable(response)))
+        } else {
+          this.checkIfDocExists()
+        }
+      }, 100)
     }
 
     private getTableHeader (): string {
