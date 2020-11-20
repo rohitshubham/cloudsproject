@@ -1,15 +1,5 @@
 <template>
   <div class="home">
-     <div class="md-layout">
-    <div class="md-layout-item md-elevation-2" style="margin: 1%;">
-      <a href="/">
-      <div class="header">
-        <img class= "coronavirus-image" :src="imageUrl" alt="Coronavirus">
-        <h1 v-if="country.length > 0">COVID-19 Information Center</h1>
-        </div>
-        </a>
-    </div>
-  </div>
   <div class="md-layout">
       <div class="md-layout-item" ><h1>{{capitalizeFirstLetter(countryName)}}</h1></div>
     </div>
@@ -54,10 +44,6 @@ span {
 import { Component, Vue } from 'vue-property-decorator'
 import { Route } from 'vue-router'
 import HomeCharts from '@/components/HomeCharts.vue'
-import firebase from 'firebase/app'
-import 'firebase/storage'
-
-declare let firebaseObj: any
 
 interface WithRoute {
   $route: Route;
@@ -70,18 +56,11 @@ interface WithRoute {
 })
 export default class Country extends Vue implements WithRoute {
     private countryName = ''
-    private imageUrl = ''
     private country = ''
 
     private initApp (): void {
       this.country = this.$route.params.country
       this.countryName = this.country
-      const storage = firebaseObj.storage()
-      const gsReference = storage.refFromURL('gs://covid19-fa2c0.appspot.com/23312-min(1).jpg')
-
-      gsReference.getDownloadURL().then((url) => {
-        this.imageUrl = url
-      })
     }
 
     private capitalizeFirstLetter (string) {

@@ -14,7 +14,7 @@ const routes: Array<RouteConfig> = [
   },
   {
     path: '/homepage',
-    name: 'Coronahome',
+    name: 'CoronaHomePage',
     component: HomePage
   },
   {

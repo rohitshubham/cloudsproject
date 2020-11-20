@@ -79,7 +79,7 @@ export class CountryDataFetchService {
   private getData (dataArray) {
     const result: any = []
     let i
-    for (i = 1; i < 8; i++) {
+    for (i = 1; i < dataArray.length; i++) {
       result.push(Math.abs(parseInt(dataArray[i].Cases) - parseInt(dataArray[i - 1].Cases)))
     }
 

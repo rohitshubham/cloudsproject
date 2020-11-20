@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/covid19-fa2c0.appspot.com/o/1.jpg?alt=media&token=16f170a7-b1c4-45cb-8a6b-579022a8a4a6">
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
@@ -14,7 +15,14 @@
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>
-
+<style>
+.md-menu-content{
+  z-index: 100000 !important;
+}
+.md-dialog-container{
+  min-width: 50% !important;
+}
+</style>
   <!-- The core Firebase JS SDK is always required and must be listed first -->
 <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-app.js"></script>
 
