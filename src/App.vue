@@ -108,8 +108,10 @@ export default class App extends Vue {
 
     if (this.user) {
       this.isUserSignedIn = true
+      console.log('Signed in user detected')
     } else {
       this.isUserSignedIn = false
+      console.log('no signedin user detected')
     }
   }
 
@@ -126,7 +128,7 @@ export default class App extends Vue {
   private auth () {
     const provider = new firebase.auth.GoogleAuthProvider()
     firebaseObj.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
-      firebaseObj.auth().signInWithPopup(provider).then((result: any) => {
+      return firebaseObj.auth().signInWithPopup(provider).then((result: any) => {
         if (result !== undefined) {
           // This gives you a Google Access Token. You can use it to access the Google API.
           this.token = result!.credential.accessToken
