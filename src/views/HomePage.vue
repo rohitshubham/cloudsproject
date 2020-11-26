@@ -16,6 +16,8 @@
 import Navigation from '@/components/Navigation.vue'
 import HomeCharts from '@/components/HomeCharts.vue'
 import { Component, Vue } from 'vue-property-decorator'
+import axios from 'axios'
+import 'firebase/firestore'
 
 declare let firebaseObj: any | undefined
 
@@ -27,8 +29,28 @@ declare let firebaseObj: any | undefined
 })
 export default class HomePage extends Vue {
   private country = ''
+
+  private updateDataInStore (data: Array<any>, shouldUpdateData = false): void {
+    if (!shouldUpdateData) {
+      console.log('countries data not updated')
+      return
+    }
+
+    const countriesRef = firebaseObj.firestore()
+      .collection('countriesList')
+      .doc('list')
+    countriesRef.set({ latest: data })
+    console.log('Updated countries list in database')
+  }
+
   private initApp (): void {
     this.country = 'summary'
+
+    // Update the countries list
+    axios.get('https://api.covid19api.com/countries')
+      .then(response => {
+        this.updateDataInStore(response.data)
+      })
   }
 
   mounted () {

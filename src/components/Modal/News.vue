@@ -10,8 +10,15 @@
       <md-dialog-title> Add News Item </md-dialog-title>
       <md-dialog-content>
         <div id="mixed-menu">
-          <md-autocomplete v-model="selectedCountry" :md-options="countries" md-dense>
+          <md-autocomplete :md-fuzzy-search="false" v-model="selectedCountryTerm" :md-options="countries" @md-selected="selectCountry"
+ md-dense>
               <label>Country</label>
+              <template slot="md-autocomplete-item" slot-scope="{ item, term }">
+                <md-highlight-text :md-term="term">{{ item.Country }}</md-highlight-text>
+              </template>
+              <template slot="md-autocomplete-empty" slot-scope="{ term }">
+                No countries matching "{{ term }}" were found.
+              </template>
           </md-autocomplete>
           <md-field>
             <label>News</label>
@@ -24,6 +31,11 @@
         <md-button class="md-primary" @click="onConfirm">Save</md-button>
       </md-dialog-actions>
     </md-dialog>
+    <md-dialog-alert
+      :md-active.sync="displaySavedStatus"
+      md-content="Your news has been saved!"
+      md-confirm-text="OK" />
+
   </div>
 </template>
 
@@ -37,16 +49,57 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import 'firebase/firestore'
+import 'firebase/auth'
+
+// eslint-disable-next-line
+declare let firebaseObj: any | undefined
 
 @Component
 export default class News extends Vue {
   private active = false
   private value: string | null = null
   private textarea: string | null = null
+  private displaySavedStatus = false
+  private selectedCountry
+  private signedUserEmail
+  private signedUserName
+  private selectedCountryTerm: string | null = null
+  // Added some default countries
+  private countries = [
+    'Algeria',
+    'Argentina',
+    'Brazil',
+    'Canada',
+    'Italy',
+    'Japan',
+    'United Kingdom',
+    'United States'
+  ]
+
+  private selectCountry (country) {
+    this.selectedCountry = country
+    this.selectedCountryTerm = country.Country
+  }
 
   private onConfirm () {
     this.value = 'Agreed'
     this.active = false
+    const date = new Date()
+
+    firebaseObj.firestore()
+      .collection('news')
+      .add({
+        slug: this.selectedCountry.Slug,
+        countryName: this.selectedCountry.Country,
+        userName: this.signedUserName,
+        email: this.signedUserEmail,
+        news: this.textarea,
+        created: date.toISOString()
+      }).then((res) => {
+        console.log(`saved the document with id : ${res.id}`)
+        this.displaySavedStatus = true
+      })
   }
 
   private onCancel () {
@@ -54,17 +107,29 @@ export default class News extends Vue {
     this.active = false
   }
 
-      private selectedCountry: string | null = null
-    private countries = [
-      'Algeria',
-      'Argentina',
-      'Brazil',
-      'Canada',
-      'Italy',
-      'Japan',
-      'United Kingdom',
-      'United States'
-    ]
+  private initNewsApp () {
+    const user = firebaseObj.auth().currentUser
+    const countriesData = firebaseObj.firestore()
+      .collection('countriesList')
+      .doc('list')
+    countriesData.get().then((data) => {
+      if (!data.exists) {
+      // impossible to happen unless someone deletes the data from backend
+        console.log('No countries data found')
+        return
+      }
+      const country = data.data().latest
+      country.unshift({ Country: 'Worldwide', Slug: 'worldwide' })
+      this.countries = country
+      this.signedUserEmail = user.email
+      this.signedUserName = user.displayName
+    })
+  }
+
+  mounted () {
+    setTimeout(() =>
+      this.initNewsApp(), 500)
+  }
 }
 
 </script>
