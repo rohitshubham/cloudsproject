@@ -2,8 +2,17 @@
   <div>
     <div class="md-layout" style="margin-left: 1%; margin-right: 1%">
       <div class="md-layout-item md-elevation-2">
-        <md-button class="md-fab md-primary" @click="active = true"><md-icon>add</md-icon></md-button>
-        <h1 id="add-news">Add News</h1>
+        <div style="display:inline-block">
+          <md-button v-if="!isAllowedToAddNews" class="md-fab md-primary" @click="active = true" disabled><md-icon>add</md-icon></md-button>
+          <md-tooltip md-direction="right">You are not allowed to add news. Contact admin!</md-tooltip>
+        </div>
+        <div style="display:inline-block">
+          <md-button v-if="isAllowedToAddNews" class="md-fab md-primary" @click="active = true"><md-icon>add</md-icon></md-button>
+          <md-tooltip md-direction="right">Add a new news!</md-tooltip>
+        </div >
+        <div>
+          <h2 id="add-news">Add News</h2>
+        </div>
       </div>
     </div>
     <md-dialog :md-active.sync="active">
@@ -39,14 +48,6 @@
   </div>
 </template>
 
-<style scoped>
-#add-news{
-  display: inline-block;
-  margin-top: 1.5%
-}
-
-</style>
-
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import 'firebase/firestore'
@@ -65,6 +66,8 @@ export default class News extends Vue {
   private signedUserEmail
   private signedUserName
   private selectedCountryTerm: string | null = null
+  private isAllowedToAddNews = false
+
   // Added some default countries
   private countries = [
     'Algeria',
@@ -107,6 +110,18 @@ export default class News extends Vue {
     this.active = false
   }
 
+  private initNewsButton () {
+    const userEmail = firebaseObj.auth().currentUser.email
+    console.log(userEmail)
+    firebaseObj.firestore().collection('allowedUsers').doc(userEmail).get().then(data => {
+      if (data.exists) {
+        console.log('User is allowed to add news')
+        this.isAllowedToAddNews = true
+        this.initNewsApp()
+      }
+    })
+  }
+
   private initNewsApp () {
     const user = firebaseObj.auth().currentUser
     const countriesData = firebaseObj.firestore()
@@ -128,7 +143,7 @@ export default class News extends Vue {
 
   mounted () {
     setTimeout(() =>
-      this.initNewsApp(), 500)
+      this.initNewsButton(), 500)
   }
 }
 
